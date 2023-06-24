@@ -9,3 +9,29 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  fullName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  account   Account?
+  password  String
+  role      String   @default("user")
+}
+
+model Account {
+  id       Int    @id @default(autoincrement())
+  balance  Int    @default(0)
+  userId   Int    @unique
+  user     User   @relation(fields: [userId], references: [id])
+  publicId String @unique
+  shares   Int    @default(0)
+}
+
+// there should only ever be one record in this table
+model App {
+  id Int @id @default(autoincrement())
+  init Boolean @default(false)
+}

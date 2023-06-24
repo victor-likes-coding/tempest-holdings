@@ -13,6 +13,15 @@ export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];
 
+//Routes:
+// /invest
+// /account
+// /login
+// /register
+// /forgot-password
+// /pool
+// /borrow
+
 export default function App() {
   return (
     <html lang="en">
