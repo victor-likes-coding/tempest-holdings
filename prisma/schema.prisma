@@ -11,27 +11,44 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   email     String   @unique
   fullName  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   account   Account?
-  password  String
   role      String   @default("user")
+  password  String
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  fromId    String
+  toId      String
+  amount    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  from      Account  @relation("TransactionFrom", fields: [fromId], references: [id])
+  to        Account  @relation("TransactionTo", fields: [toId], references: [id])
+  shares    Int
 }
 
 model Account {
-  id       Int    @id @default(autoincrement())
-  balance  Int    @default(0)
-  userId   Int    @unique
-  user     User   @relation(fields: [userId], references: [id])
-  publicId String @unique
-  shares   Int    @default(0)
+  id               String        @id @default(uuid())
+  balance          Int           @default(0)
+  userId           String        @unique
+  user             User          @relation(fields: [userId], references: [id])
+  publicId         String        @unique @default(cuid())
+  shares           Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  transactionsFrom Transaction[] @relation("TransactionFrom")
+  transactionsTo   Transaction[] @relation("TransactionTo")
+  userAccount      Boolean       @default(true)
 }
 
 // there should only ever be one record in this table
 model App {
-  id Int @id @default(autoincrement())
+  id   Int     @id @default(autoincrement())
   init Boolean @default(false)
 }

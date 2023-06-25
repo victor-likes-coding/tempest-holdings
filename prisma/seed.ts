@@ -15,7 +15,6 @@ async function seed() {
       account: {
         create: {
           balance: 1000,
-          publicId: 'abc123',
           shares: 100,
         },
       },
@@ -31,7 +30,6 @@ async function seed() {
       account: {
         create: {
           balance: 2000,
-          publicId: 'def456',
           shares: 3000,
         },
       },

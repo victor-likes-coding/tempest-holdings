@@ -12,6 +12,7 @@ import { RemixServer } from '@remix-run/react';
 import isbot from 'isbot';
 import { renderToPipeableStream } from 'react-dom/server';
 import { db } from '~/utils/db.server';
+import { maxShares } from 'app.config.json';
 
 const ABORT_DELAY = 5_000;
 
@@ -20,7 +21,7 @@ export default function handleRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
-  loadContext: AppLoadContext,
+  loadContext: AppLoadContext
 ) {
   // Check if the main account exists
   (async function () {
@@ -30,17 +31,20 @@ export default function handleRequest(
     if (!mainAccountExists) {
       await db.app.create({ data: { init: true } });
       // Perform any additional logic if needed for creating the main account
-      const createdMainUser = await db.user.create({
+      if (!process.env.APP_EMAIL || !process.env.APP_OWNER_NAME || !process.env.APP_HASH_PASSWORD) {
+        throw new Error('Missing environment variables for creating the main account');
+      }
+
+      await db.user.create({
         data: {
-          email: 'victor.tran@tempestas.io',
-          fullName: 'Tempest Holdings, LLC',
-          password:
-            '$2b$12$e0Gqqz2eHPDAkTx7A5zL3uSI1nrFdj3vQ3HqrlrNVa6QuY1clIuWW',
+          email: process.env.APP_EMAIL,
+          fullName: process.env.APP_OWNER_NAME,
+          password: process.env.APP_HASH_PASSWORD,
           account: {
             create: {
               balance: 0,
-              publicId: 'main-account',
-              shares: 10000000,
+              shares: maxShares,
+              userAccount: false,
             },
           },
         },
@@ -52,26 +56,11 @@ export default function handleRequest(
   })();
 
   return isbot(request.headers.get('user-agent'))
-    ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext,
-      )
-    : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext,
-      );
+    ? handleBotRequest(request, responseStatusCode, responseHeaders, remixContext)
+    : handleBrowserRequest(request, responseStatusCode, responseHeaders, remixContext);
 }
 
-function handleBotRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-) {
+function handleBotRequest(request: Request, responseStatusCode: number, responseHeaders: Headers, remixContext: EntryContext) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
@@ -91,7 +80,7 @@ function handleBotRequest(
             new Response(body, {
               headers: responseHeaders,
               status: responseStatusCode,
-            }),
+            })
           );
 
           pipe(body);
@@ -108,19 +97,14 @@ function handleBotRequest(
             console.error(error);
           }
         },
-      },
+      }
     );
 
     setTimeout(abort, ABORT_DELAY);
   });
 }
 
-function handleBrowserRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-) {
+function handleBrowserRequest(request: Request, responseStatusCode: number, responseHeaders: Headers, remixContext: EntryContext) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
@@ -140,7 +124,7 @@ function handleBrowserRequest(
             new Response(body, {
               headers: responseHeaders,
               status: responseStatusCode,
-            }),
+            })
           );
 
           pipe(body);
@@ -157,7 +141,7 @@ function handleBrowserRequest(
             console.error(error);
           }
         },
-      },
+      }
     );
 
     setTimeout(abort, ABORT_DELAY);

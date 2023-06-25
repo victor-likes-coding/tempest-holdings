@@ -1,9 +1,10 @@
-import type { IUser } from './IUser';
-
 export interface IAccount {
-  id: number;
+  id: string;
   balance: number;
-  userId: number;
+  userId: string;
   publicId: string;
   shares: number;
+  userAccount: boolean
+  createdAt: string;
+  updatedAt: string;
 }

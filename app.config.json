@@ -1,5 +1,5 @@
 {
-  "maxDistributions": 0.8,
-  "maxShares": 100000000,
-  "costPerShare": 50
+  "maxDistributions": 0.375,
+  "maxShares": 500000000,
+  "costPerShare": 15
 }

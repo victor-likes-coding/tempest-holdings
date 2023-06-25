@@ -1,20 +1,17 @@
 import type { V2_MetaFunction } from '@remix-run/node';
-import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
-import { db } from '~/utils/db.server';
 import { Account } from 'models/Account';
+import type { User } from 'models/User';
+import { db } from '~/utils/db.server';
 
 export const meta: V2_MetaFunction = () => {
-  return [
-    { title: 'New Remix App' },
-    { name: 'description', content: 'Welcome to Remix!' },
-  ];
+  return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }];
 };
 
 export const loader = async () => {
-  return json({
-    investors: await db.user.findMany({ include: { account: true } }),
-  });
+  const accounts = await db.account.findMany();
+
+  return { accounts };
 };
 
 export default function Index() {
@@ -25,16 +22,16 @@ export default function Index() {
 
       <h2>Investors</h2>
       <ul>
-        {data.investors.length > 0 ? (
-          data.investors.map((investor) => {
-            if (investor.account === null) return null;
-            const account = new Account(investor.account);
+        {data.accounts && data.accounts.length > 0 ? (
+          data?.accounts?.map((account) => {
+            if (!account.userAccount || !account) return null;
+            const acc = new Account(account);
             return (
-              <li key={investor.id}>
-                <div>Wallet: {account.publicId}</div>
-                <div>Balance: {account.balance}</div>
-                <div>Shares: {account.shares}</div>
-                <div>Return: {account.getReturnRate()}%</div>
+              <li key={account.id}>
+                <div>Wallet: {acc.publicId}</div>
+                <div>Balance: ${acc.balance.toLocaleString()}</div>
+                <div>Shares: {acc.shares.toLocaleString()}</div>
+                <div>Return: {acc.getReturnRate()}%</div>
               </li>
             );
           })

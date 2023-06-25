@@ -6,8 +6,6 @@ export class User implements IUser {
   fullName: string;
   createdAt: Date;
   updatedAt: Date;
-  accountId: number;
-  password: string;
   role: string;
 
   constructor(data: IUser) {
@@ -16,8 +14,6 @@ export class User implements IUser {
     this.fullName = data.fullName;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
-    this.accountId = data.accountId;
-    this.password = data.password;
     this.role = data.role;
   }
 }

@@ -4,7 +4,5 @@ export interface IUser {
   fullName: string;
   createdAt: Date;
   updatedAt: Date;
-  accountId: number;
-  password: string;
   role: string;
 }
